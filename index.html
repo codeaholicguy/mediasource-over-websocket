@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<head>
+  <title>Media Source PoC</title>
+</head>
+<body>
+  <h1>
+    Media Source PoC
+    <button onclick="viewVideo()">Play Video</button>
+    <button onclick="viewImage()">View Image</button>
+  </h1>
+  <video id="video" autoplay width="320" height="240"></video>
+  <img id="image" />
+
+  <script>
+    const ws = new WebSocket('ws://localhost:8080');
+
+    let mode
+
+    const video = document.querySelector('#video');
+    const mimeCodec = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+
+    let mediaSource
+    let sourceBuffer
+    if ('MediaSource' in window && MediaSource.isTypeSupported(mimeCodec)) {
+      mediaSource = new MediaSource();
+      video.src = window.URL.createObjectURL(mediaSource);
+      mediaSource.addEventListener('sourceopen', () => {
+        console.log('mediaSource sourceopen', mediaSource.readyState);
+        sourceBuffer = mediaSource.addSourceBuffer(mimeCodec);
+        sourceBuffer.addEventListener('updateend', function (_) {
+          mediaSource.endOfStream();
+          console.log('mediaSource updateend',mediaSource.readyState); // ended
+        });
+      });
+    }
+
+
+    ws.onopen = () => {
+      ws.onmessage = (event) => {
+        if (typeof event.data === 'string') {
+          console.log(event.data);
+        } else {
+          console.log(event.data);
+
+          if (mode === 'image') {
+            // Test data from server is valid buffer
+            const image = document.querySelector("#image");
+            image.src = window.URL.createObjectURL(event.data);
+          } else if (mode === 'video') {
+            const videoUrl = window.URL.createObjectURL(event.data);
+            get(videoUrl, (buffer) => {
+              sourceBuffer.appendBuffer(buffer);
+            });
+          }
+        }
+      }
+    }
+
+    function viewVideo() {
+      mode = 'video';
+      ws.send('video');
+    }
+
+    function viewImage() {
+      mode = 'image';
+      ws.send('image');
+    }
+
+    function get(url, callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('get', url, true);
+      xhr.responseType = 'arraybuffer';
+      xhr.send();
+
+      xhr.onload = function(e) {
+        callback(xhr.response);
+      };
+    }
+
+  </script>
+</body>

@@ -1,0 +1,11 @@
+{
+  "name": "mediasource-poc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Codeaholicguy",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.14.1",
+    "ws": "^2.1.0"
+  }
+}
