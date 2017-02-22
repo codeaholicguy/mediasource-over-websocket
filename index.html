@@ -27,7 +27,7 @@
       mediaSource.addEventListener('sourceopen', () => {
         console.log('mediaSource sourceopen', mediaSource.readyState);
         sourceBuffer = mediaSource.addSourceBuffer(mimeCodec);
-        sourceBuffer.addEventListener('updateend', function (_) {
+        sourceBuffer.addEventListener('updateend', () => {
           mediaSource.endOfStream();
           console.log('mediaSource updateend',mediaSource.readyState); // ended
         });
@@ -72,7 +72,7 @@
       xhr.responseType = 'arraybuffer';
       xhr.send();
 
-      xhr.onload = function(e) {
+      xhr.onload = () => {
         callback(xhr.response);
       };
     }
