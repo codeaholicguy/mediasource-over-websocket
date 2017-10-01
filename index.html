@@ -21,26 +21,27 @@
 
     let mediaSource
     let sourceBuffer
+    
     if ('MediaSource' in window && MediaSource.isTypeSupported(mimeCodec)) {
       mediaSource = new MediaSource();
       video.src = window.URL.createObjectURL(mediaSource);
       mediaSource.addEventListener('sourceopen', () => {
         console.log('mediaSource sourceopen', mediaSource.readyState);
+        
         sourceBuffer = mediaSource.addSourceBuffer(mimeCodec);
         sourceBuffer.addEventListener('updateend', () => {
           mediaSource.endOfStream();
-          console.log('mediaSource updateend',mediaSource.readyState); // ended
+          console.log('mediaSource updateend', mediaSource.readyState); // ended
         });
       });
     }
 
-
     ws.onopen = () => {
       ws.onmessage = (event) => {
         if (typeof event.data === 'string') {
-          console.log(event.data);
+          console.log('receive string message', event.data);
         } else {
-          console.log(event.data);
+          console.log('receive blob message', event.data);
 
           if (mode === 'image') {
             // Test data from server is valid buffer
